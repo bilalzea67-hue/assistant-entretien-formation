@@ -13,25 +13,43 @@ export const useAppStore = create<SupabaseStore>((set, get) => ({
   setAddModalOpen: (open) => set({ isAddModalOpen: open }),
 
   fetchClients: async () => {
-    const { data, error } = await supabase.from('clients').select('*');
-    if (error) {
-      console.error('Error fetching clients:', error);
-    } else if (data) {
-      set({ clients: data as Client[] });
+    try {
+      console.log('Fetching clients from Supabase...');
+      const { data, error } = await supabase.from('clients').select('*');
+      if (error) {
+        console.error('Supabase fetch error:', error);
+      } else if (data) {
+        console.log('Fetched data:', data);
+        // Ensure tasks is parsed if it comes back as string by mistake
+        const parsedData = data.map(client => ({
+          ...client,
+          tasks: typeof client.tasks === 'string' ? JSON.parse(client.tasks) : (client.tasks || [])
+        }));
+        set({ clients: parsedData as Client[] });
+      }
+    } catch (err) {
+      console.error('Exception in fetchClients:', err);
     }
   },
 
   addClient: async (client) => {
-    // Optimistic UI update
-    set((state) => ({
-      clients: [client, ...state.clients],
-    }));
+    try {
+      console.log('Adding client optimistic:', client);
+      // Optimistic UI update
+      set((state) => ({
+        clients: [client, ...state.clients],
+      }));
 
-    const { error } = await supabase.from('clients').insert([client]);
-    if (error) {
-      console.error('Error adding client:', error);
-      // Revert optimistic update on error (simplified)
-      get().fetchClients();
+      const { error } = await supabase.from('clients').insert([client]);
+      if (error) {
+        console.error('Supabase insert error:', error);
+        // Revert optimistic update on error (simplified)
+        get().fetchClients();
+      } else {
+        console.log('Client saved to Supabase successfully.');
+      }
+    } catch (err) {
+      console.error('Exception in addClient:', err);
     }
   },
 

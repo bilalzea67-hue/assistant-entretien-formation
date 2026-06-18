@@ -30,25 +30,45 @@ export function TableView() {
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
 
   const filteredClients = clients.filter((client) => {
-    if (dateFilter !== 'all') {
-      const date = parseISO(client.appointmentDate);
-      if (dateFilter === 'today' && !isToday(date)) return false;
-      if (dateFilter === 'week' && !isThisWeek(date)) return false;
-      if (dateFilter === 'month' && !isThisMonth(date)) return false;
+    try {
+      if (!client) return false;
+
+      if (dateFilter !== 'all') {
+        if (!client.appointmentDate) return false;
+        const date = parseISO(client.appointmentDate);
+        if (dateFilter === 'today' && !isToday(date)) return false;
+        if (dateFilter === 'week' && !isThisWeek(date)) return false;
+        if (dateFilter === 'month' && !isThisMonth(date)) return false;
+      }
+
+      if (formationFilter !== 'all' && client.formation !== formationFilter) return false;
+
+      if (showOnlyLate) {
+        const tasks = Array.isArray(client.tasks) ? client.tasks : [];
+        const hasLate = tasks.some(t => {
+          if (!t || !t.dueDate) return false;
+          return !t.isCompleted && isPast(new Date(t.dueDate)) && !isToday(new Date(t.dueDate));
+        });
+        if (!hasLate) return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.error('Error filtering client:', client, err);
+      return false;
     }
-
-    if (formationFilter !== 'all' && client.formation !== formationFilter) return false;
-
-    if (showOnlyLate) {
-      const hasLate = client.tasks.some(t => !t.isCompleted && new Date(t.dueDate) < new Date() && !isToday(new Date(t.dueDate)));
-      if (!hasLate) return false;
-    }
-
-    return true;
   });
 
-  // Sort by appointment date descending
-  filteredClients.sort((a, b) => new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime());
+  // Sort by appointment date descending safely
+  filteredClients.sort((a, b) => {
+    try {
+      const dateA = a.appointmentDate ? new Date(a.appointmentDate).getTime() : 0;
+      const dateB = b.appointmentDate ? new Date(b.appointmentDate).getTime() : 0;
+      return dateA - dateB;
+    } catch (e) {
+      return 0;
+    }
+  });
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[#f4f5f7]">
