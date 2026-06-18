@@ -148,10 +148,12 @@ export function TableView() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filteredClients.map((client) => {
-                const remainingTasks = client.tasks.filter(t => !t.isCompleted).length;
-                const lateTasks = client.tasks.filter(t => !t.isCompleted && isPast(new Date(t.dueDate)) && !isToday(new Date(t.dueDate))).length;
+                const tasks = client.tasks || [];
+                const remainingTasks = tasks.filter(t => !t.isCompleted).length;
+                const lateTasks = tasks.filter(t => !t.isCompleted && isPast(new Date(t.dueDate)) && !isToday(new Date(t.dueDate))).length;
                 const statusIndex = CLIENT_STATUSES.indexOf(client.status);
-                const progressColor = client.progress === 100 ? 'bg-green-500' : 'bg-blue-600';
+                const progress = client.progress || 0;
+                const progressColor = progress === 100 ? 'bg-green-500' : 'bg-blue-600';
 
                 return (
                   <Link href={`/client/${client.id}`} key={client.id} legacyBehavior>
