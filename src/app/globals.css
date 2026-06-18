@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #f4f5f7;
+    --foreground: #172b4d;
+    --accent: #0052cc;
+    --gray-light: #ebecf0;
+    --gray-medium: #dfe1e6;
+  }
+
+  body {
+    color: var(--foreground);
+    background: var(--background);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+}
+
+@layer components {
+  .kanban-column {
+    @apply bg-[#ebecf0] rounded-2xl p-4 min-w-[340px] max-w-[340px] flex flex-col shadow-sm h-full max-h-[calc(100vh-170px)];
+  }
+
+  .client-card {
+    @apply bg-white rounded-xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer border border-transparent hover:border-blue-100 active:bg-gray-50;
+  }
+
+  .btn-primary {
+    @apply bg-[#0052cc] text-white px-5 py-2.5 rounded-lg hover:bg-[#0747a6] transition-all flex items-center gap-2 font-bold text-sm shadow-md shadow-blue-900/10 active:scale-95;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom Scrollbar for Kanban Columns */
+.column-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.column-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.column-scroll::-webkit-scrollbar-thumb {
+  background: #dfe1e6;
+  border-radius: 10px;
+}
+.column-scroll::-webkit-scrollbar-thumb:hover {
+  background: #c1c7d0;
+}
